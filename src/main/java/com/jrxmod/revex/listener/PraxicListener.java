@@ -12,12 +12,15 @@ public class PraxicListener {
 
     public static void register() {
         PraxicViolationEvent.EVENT.register((player, checkName, violations, details, action) -> {
-            if (!Revex.getConfig().enabled) return;
+            if (!Revex.getConfig().enabled) return false;
 
             // Only intercept when PRAXIC resolves a punishable action (not just "flag")
-            if (action.equals("flag")) return;
+            // Return false so PRAXIC handles flags normally
+            if (action.equals("flag")) return false;
 
+            // REVEX takes over — return true to cancel PRAXIC's built-in punishment
             handleViolation(player, checkName, violations, details);
+            return true;
         });
 
         Revex.LOGGER.info("[REVEX] Listening to PRAXIC violation events.");
@@ -34,7 +37,7 @@ public class PraxicListener {
                     "§6[REVEX] §eWarning! §7Suspicious activity detected.\n" +
                     "§8» §7Check: §f" + checkName + " §8| §7Next offense will result in a temporary ban."
             ));
-            sendStaffAlert(player, checkName, "warn", null);
+            sendStaffAlert(player, checkName, "warn");
 
         } else if (escalationAction.startsWith("tempban ")) {
             String durationStr = escalationAction.substring(8).trim();
@@ -49,7 +52,7 @@ public class PraxicListener {
             BanManager.BanEntry entry = banManager.getBan(player.getUUID());
             player.connection.disconnect(banManager.buildBanScreen(entry));
 
-            sendStaffAlert(player, checkName, "tempban " + durationStr, null);
+            sendStaffAlert(player, checkName, "tempban " + durationStr);
             Revex.LOGGER.warn("[REVEX] Player {} temp-banned for {} by {}.",
                     player.getName().getString(), durationStr, checkName);
 
@@ -58,13 +61,13 @@ public class PraxicListener {
             BanManager.BanEntry entry = banManager.getBan(player.getUUID());
             player.connection.disconnect(banManager.buildBanScreen(entry));
 
-            sendStaffAlert(player, checkName, "permanent ban", null);
+            sendStaffAlert(player, checkName, "permanent ban");
             Revex.LOGGER.warn("[REVEX] Player {} permanently banned by {}.",
                     player.getName().getString(), checkName);
         }
     }
 
-    private static void sendStaffAlert(ServerPlayer player, String checkName, String action, String extra) {
+    private static void sendStaffAlert(ServerPlayer player, String checkName, String action) {
         if (!Revex.getConfig().staffAlerts) return;
         if (player.getServer() == null) return;
 
