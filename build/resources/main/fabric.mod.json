@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "id": "revex",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "name": "REVEX",
   "description": "Graduated punishment system for PRAXIC AntiCheat. Tempbans, escalation, smart enforcement.",
   "authors": [
